@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>理工图书馆座位签到</title>
+    <script src="https://cdn.staticfile.org/jquery/3.6.0/jquery.min.js"></script>
+    <script src="https://cdn.staticfile.org/jquery.qrcode/1.0/jquery.qrcode.min.js"></script>
+    <style>
+        .title {
+            font-size: 24px;
+            font-weight: bold;
+            text-align: center;
+            margin-top: 80px;
+            margin-bottom: 20px;
+        }
+        .notice {
+            font-size: 14px;
+            text-align: center;
+            margin-bottom: 50px;
+        }
+
+        .qrcode {
+            width: 200px;
+            height: 200px;
+            border: 1px solid #ffad33;
+            margin: 0 auto;
+        }
+
+        canvas {
+            width: 200px;
+            height: 200px;
+        }
+
+        .link {
+            text-align: center;
+            margin-top: 50px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="main">
+        <div class="title">
+            <h3>微信长按扫码或点击签到</h3>
+        </div>
+        <div class="notice">
+            <p>Tips: 仅供常熟理工学院图书馆座位签到使用</p>
+            <p>请使用预约系统绑定微信扫码签到</p>
+        </div>
+        <div id="qrcode" class="qrcode"></div>
+        <div class="link">
+            <a href="javascript:void(0);" onclick="javascript:window.location.href=getUrl()">点我签到</a>
+        </div>
+    </div>
+</body>
+
+</html>
+<script>
+    drawQrcode();
+    // 获取13位时间戳
+    function getTimeStamp() {
+        var timestamp = new Date().getTime();
+        return timestamp;
+    }
+    // base64加密
+    function base64_encode(str) {
+        var c1, c2, c3;
+        var base64EncodeChars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
+        var i = 0,
+            len = str.length,
+            string = '';
+
+        while (i < len) {
+            c1 = str.charCodeAt(i++) & 0xff;
+            if (i == len) {
+                string += base64EncodeChars.charAt(c1 >> 2);
+                string += base64EncodeChars.charAt((c1 & 0x3) << 4);
+                string += "==";
+                break;
+            }
+            c2 = str.charCodeAt(i++);
+            if (i == len) {
+                string += base64EncodeChars.charAt(c1 >> 2);
+                string += base64EncodeChars.charAt(((c1 & 0x3) << 4) | ((c2 & 0xF0) >> 4));
+                string += base64EncodeChars.charAt((c2 & 0xF) << 2);
+                string += "=";
+                break;
+            }
+            c3 = str.charCodeAt(i++);
+            string += base64EncodeChars.charAt(c1 >> 2);
+            string += base64EncodeChars.charAt(((c1 & 0x3) << 4) | ((c2 & 0xF0) >> 4));
+            string += base64EncodeChars.charAt(((c2 & 0xF) << 2) | ((c3 & 0xC0) >> 6));
+            string += base64EncodeChars.charAt(c3 & 0x3F)
+        }
+        return string
+    }
+    // 处理数据
+    function getUrl() {
+        // 定义参数
+        var str1 = "{\"timestamp\":";
+        var str2 = ",\"roomid\":\"\"}";
+        var str = str1 + getTimeStamp() + str2;
+        var str = base64_encode(str);
+        var urldata = "http://zw.cslg.edu.cn/seat/seat/sign.jsp?authType=hwwx&signdata=" + str;
+        return urldata;
+    }
+    // 绘制二维码
+    function drawQrcode() {
+        $('#qrcode').html('');
+        $('#qrcode').qrcode(getUrl());
+    }
+    setInterval(drawQrcode, 3000);
+</script>
